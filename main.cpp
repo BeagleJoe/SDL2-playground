@@ -165,8 +165,7 @@ int handle_events()
    int return_value = 0;
    SDL_Event event;
 
-   // should be while??
-   if(SDL_PollEvent(&event))
+   while(SDL_PollEvent(&event))
    {
       // Process events we care about, and ignore the others.
          switch(event.type)
