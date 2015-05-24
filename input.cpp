@@ -24,4 +24,37 @@
 
 ==============================================================================
 */
+#include "main.h"
 #include "input.h"
+
+//============================================================================
+int handle_events()
+{
+   int return_value = 0;
+   SDL_Event event;
+   static int unicode = 0;
+   static SDL_Keymod modifier = KMOD_NONE;
+
+   while(SDL_PollEvent(&event))
+   {
+      // Process events we care about, and ignore the others.
+         switch(event.type)
+         {
+            case SDL_TEXTINPUT:
+               unicode = (int)(event.text.text[0]);
+               modifier = SDL_GetModState();
+               //injectKeyboardEvent(unicode,modifier, 0,0);
+               printf("SDL_TEXTINPUT: %c %X\r\n",(char)unicode,modifier);
+               break;
+
+            case SDL_QUIT:
+               gGameOver = true;
+               break;
+
+            default:
+               break;
+         }
+   }
+
+   return return_value;
+}

@@ -24,4 +24,9 @@
 
 ==============================================================================
 */
-#include <stdio.h>
+#ifndef _input_h_
+#define _input_h_
+
+int handle_events();
+
+#endif // _input_h_

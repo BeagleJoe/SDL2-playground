@@ -25,7 +25,7 @@
 ==============================================================================
 */
 #include "main.h"
-#include <SDL.h>
+#include "input.h"
 
 /* Boolean */
 #define GL_TRUE                           1
@@ -45,7 +45,6 @@ bool gGameOver = false;
 // Forward declare functions
 int do_work();
 
-int handle_events();
 int update_state();
 int redraw();
 
@@ -159,29 +158,7 @@ int redraw()
 
    return return_value;
 }
-//============================================================================
-int handle_events()
-{
-   int return_value = 0;
-   SDL_Event event;
 
-   while(SDL_PollEvent(&event))
-   {
-      // Process events we care about, and ignore the others.
-         switch(event.type)
-         {
-            case SDL_QUIT:
-               gGameOver = true;
-               break;
-
-            default:
-               break;
-         }
-   }
-
-
-   return return_value;
-}
 //============================================================================
 int update_state()
 {

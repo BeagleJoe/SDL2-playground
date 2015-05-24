@@ -24,4 +24,12 @@
 
 ==============================================================================
 */
+#ifndef _main_h_
+#define _main_h_
+
 #include <stdio.h>
+#include <SDL.h>
+
+extern bool gGameOver;
+
+#endif // _main_h_
