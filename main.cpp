@@ -31,30 +31,37 @@
 #define GL_TRUE                           1
 #define GL_FALSE                          0
 
+#define PLAYGROUND_OK                     0
+
+// Global variables
 SDL_Window* gWin = NULL;
 SDL_Renderer* gRenderer = NULL;
 
 int gWinWidth = 640;
 int gWinHeight = 480;
 
+bool gGameOver = false;
+
 // Forward declare functions
 int do_work();
-int render();
 
+int handle_events();
+int update_state();
+int redraw();
 
+int setupSDL2();
+int shutdownSDL2();
+
+//============================================================================
 int main(int argc, char **argv)
 {
    int return_value = 0;
 
-   // Initialize SDL video subsystem (and exit if not supported).
-   if (SDL_InitSubSystem(SDL_INIT_VIDEO) >= 0)
+   if (PLAYGROUND_OK == setupSDL2())
    {
       do_work();
 
-      // Shutdown SDL video sub-system.
-      SDL_QuitSubSystem(SDL_INIT_VIDEO);
-      // Shudown SDL.
-      SDL_Quit();
+      shutdownSDL2();
    }
    else
    {
@@ -64,36 +71,73 @@ int main(int argc, char **argv)
 
    return return_value;
 }
-
+//============================================================================
 int do_work()
 {
    int return_value = 0;
 
-   //printf("Hello World\n");
-   gWin = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_RESIZABLE);//SDL_WINDOW_SHOWN
-   if(gWin != 0)
+   while(false == gGameOver)
    {
-      gRenderer = SDL_CreateRenderer(gWin,-1,0);
-      if(NULL != gRenderer)
+      handle_events();
+      update_state();
+      redraw();
+      
+      SDL_Delay(5000);
+      gGameOver = true;
+   }
+
+   return return_value;
+}
+//============================================================================
+int setupSDL2()
+{
+   int return_value = 0;
+
+   if (SDL_InitSubSystem(SDL_INIT_VIDEO) >= 0)
+   {
+      gWin = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_RESIZABLE);//SDL_WINDOW_SHOWN
+      if(NULL != gWin)
       {
-         return_value = render();
+         gRenderer = SDL_CreateRenderer(gWin,-1,0);
+         if(NULL != gRenderer)
+         {
+            // TODO - add more setup here
+            return_value = 0;
+         }
+         else
+         {
+            printf("SDL_CreateRenderer() failed: (%s)\n", SDL_GetError());
+            return_value = -1;
+         }
       }
       else
       {
-         printf("SDL_CreateRenderer() failed: (%s)\n", SDL_GetError());
+         printf("SDL_CreateWindow() failed: (%s)\n", SDL_GetError());
          return_value = -1;
       }
    }
    else
    {
-      printf("SDL_CreateWindow() failed: (%s)\n", SDL_GetError());
+      printf("Couldn't initialize SDL video sub-system (%s)\n", SDL_GetError());
       return_value = -1;
    }
+   return return_value;
+}
+//============================================================================
+int shutdownSDL2()
+{
+   int return_value = 0;
+
+   // Shutdown SDL video sub-system.
+   SDL_QuitSubSystem(SDL_INIT_VIDEO);
+   
+   // Shudown SDL.
+   SDL_Quit();
 
    return return_value;
 }
-
-int render()
+//============================================================================
+int redraw()
 {
    int return_value = 0;
 
@@ -103,8 +147,18 @@ int render()
 
    SDL_RenderPresent(gRenderer);
 
-   SDL_Delay(5000);
-
+   return return_value;
+}
+//============================================================================
+int handle_events()
+{
+   int return_value = 0;
+   return return_value;
+}
+//============================================================================
+int update_state()
+{
+   int return_value = 0;
    return return_value;
 }
 
