@@ -34,8 +34,12 @@
 SDL_Window* gWin = NULL;
 SDL_Renderer* gRenderer = NULL;
 
+int gWinWidth = 640;
+int gWinHeight = 480;
 
+// Forward declare functions
 int do_work();
+int render();
 
 
 int main(int argc, char **argv)
@@ -65,7 +69,42 @@ int do_work()
 {
    int return_value = 0;
 
-   printf("Hello World\n");
+   //printf("Hello World\n");
+   gWin = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_RESIZABLE);//SDL_WINDOW_SHOWN
+   if(gWin != 0)
+   {
+      gRenderer = SDL_CreateRenderer(gWin,-1,0);
+      if(NULL != gRenderer)
+      {
+         return_value = render();
+      }
+      else
+      {
+         printf("SDL_CreateRenderer() failed: (%s)\n", SDL_GetError());
+         return_value = -1;
+      }
+   }
+   else
+   {
+      printf("SDL_CreateWindow() failed: (%s)\n", SDL_GetError());
+      return_value = -1;
+   }
 
    return return_value;
 }
+
+int render()
+{
+   int return_value = 0;
+
+   SDL_SetRenderDrawColor(gRenderer,0,0,0,255);
+   
+   SDL_RenderClear(gRenderer);
+
+   SDL_RenderPresent(gRenderer);
+
+   SDL_Delay(5000);
+
+   return return_value;
+}
+
