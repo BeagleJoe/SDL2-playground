@@ -33,8 +33,8 @@ set(PROGAM_NAME "Utility" CACHE STRING "Program Name")
 
 project(${PROGAM_NAME})
 
-set(_SOURCES main.cpp)
-set(_HEADERS main.h)
+set(_SOURCES main.cpp input.cpp)
+set(_HEADERS main.h input.h)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
