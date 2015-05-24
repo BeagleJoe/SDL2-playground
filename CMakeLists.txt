@@ -43,7 +43,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   if(WIN32)
     set(CMAKE_INSTALL_PREFIX "./installed" CACHE PATH "Prefix prepended to install directories" FORCE)
   else(WIN32)
-    set(CMAKE_INSTALL_PREFIX "/usr/local/${PROJECT_NAME}" CACHE PATH "Prefix prepended to install directories" FORCE)
+    set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Prefix prepended to install directories" FORCE)
   endif(WIN32)
 endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
@@ -92,6 +92,6 @@ endif(OPTION_SDL2)
 # Fictive = no-output target, for having source files available in IDEs.
 set(DOCSOURCES COPYING LICENSE)
 add_custom_target(rootdoc SOURCES ${DOCSOURCES})
-install(FILES ${DOCSOURCES} DESTINATION .)
+install(FILES ${DOCSOURCES} DESTINATION ${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin) 
