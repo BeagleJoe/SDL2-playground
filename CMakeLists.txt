@@ -92,6 +92,6 @@ endif(OPTION_SDL2)
 # Fictive = no-output target, for having source files available in IDEs.
 set(DOCSOURCES COPYING LICENSE)
 add_custom_target(rootdoc SOURCES ${DOCSOURCES})
-install(FILES ${DOCSOURCES} DESTINATION ${PROJECT_NAME})
+install(FILES ${DOCSOURCES} DESTINATION .)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin) 
