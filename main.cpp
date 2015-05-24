@@ -81,9 +81,6 @@ int do_work()
       handle_events();
       update_state();
       redraw();
-      
-      SDL_Delay(5000);
-      gGameOver = true;
    }
 
    return return_value;
@@ -128,6 +125,19 @@ int shutdownSDL2()
 {
    int return_value = 0;
 
+   // Shutdown the renderer
+   if(NULL != gRenderer)
+   {
+      SDL_DestroyRenderer(gRenderer);
+      gRenderer = NULL;
+   }
+
+   // Shutdown the window
+   if(NULL != gWin)
+   {
+      SDL_DestroyWindow(gWin);
+      gWin = NULL;
+   }
    // Shutdown SDL video sub-system.
    SDL_QuitSubSystem(SDL_INIT_VIDEO);
    
@@ -153,6 +163,24 @@ int redraw()
 int handle_events()
 {
    int return_value = 0;
+   SDL_Event event;
+
+   // should be while??
+   if(SDL_PollEvent(&event))
+   {
+      // Process events we care about, and ignore the others.
+         switch(event.type)
+         {
+            case SDL_QUIT:
+               gGameOver = true;
+               break;
+
+            default:
+               break;
+         }
+   }
+
+
    return return_value;
 }
 //============================================================================
