@@ -39,13 +39,23 @@ set(_HEADERS main.h)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 # Setup the install prefix.
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  IF(WIN32)
-    SET(CMAKE_INSTALL_PREFIX "./installed" CACHE PATH "Prefix prepended to install directories" FORCE)
-  ELSE(WIN32)
-    SET(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Prefix prepended to install directories" FORCE)
-  ENDIF(WIN32)
-ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  if(WIN32)
+    set(CMAKE_INSTALL_PREFIX "./installed" CACHE PATH "Prefix prepended to install directories" FORCE)
+  else(WIN32)
+    set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Prefix prepended to install directories" FORCE)
+  endif(WIN32)
+endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
+# Default build configuration.
+if(NOT MSVC)
+   if(NOT CMAKE_BUILD_TYPE)
+      set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+         "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
+         FORCE)
+   endif(NOT CMAKE_BUILD_TYPE)
+   message(STATUS "Build configuration : ${CMAKE_BUILD_TYPE}")
+endif(NOT MSVC)
 
 if(MSVC)
    set(_OPTION_CUSTOM_3RDPARTY true) # Always needed for MSVC compilers.
