@@ -53,6 +53,7 @@ int do_work();
 int update_state();
 int redraw();
 
+void DumpSDLversions();
 int setupSDL2();
 int setupSDL2Joystick();
 int setupSDL2Haptic();
@@ -62,6 +63,8 @@ int shutdownSDL2();
 int main(int argc, char **argv)
 {
    int return_value = 0;
+
+   DumpSDLversions();
 
    if (PLAYGROUND_OK == setupSDL2())
    {
@@ -268,6 +271,20 @@ int shutdownSDL2()
 
    return return_value;
 }
+//============================================================================
+void DumpSDLversions()
+{
+   SDL_version compiled;
+   SDL_version linked;
+
+   SDL_VERSION(&compiled);
+   SDL_GetVersion(&linked);
+   printf("Compiled against SDL version %d.%d.%d \n",
+      compiled.major, compiled.minor, compiled.patch);
+   printf("Linking against SDL version %d.%d.%d.\n",
+      linked.major, linked.minor, linked.patch);
+}
+
 //============================================================================
 int redraw()
 {
