@@ -43,8 +43,21 @@ int handle_events()
             case SDL_TEXTINPUT:
                unicode = (int)(event.text.text[0]);
                modifier = SDL_GetModState();
-               //injectKeyboardEvent(unicode,modifier, 0,0);
                printf("SDL_TEXTINPUT: %c %X\r\n",(char)unicode,modifier);
+               break;
+
+            case SDL_KEYDOWN:
+               printf("SDL_KEYDOWN: %c\r\n",(char)event.key.keysym.sym);
+               switch(event.key.keysym.sym)
+               {
+                  case SDLK_ESCAPE:
+                     gGameOver = true;
+                     break;
+               }
+               break;
+
+            case SDL_KEYUP:
+               printf("SDL_KEYUP: %c unicode = %c\r\n",(char)event.key.keysym.sym,(char)unicode);
                break;
 
             case SDL_QUIT:
