@@ -37,6 +37,9 @@
 SDL_Window* gWin = NULL;
 SDL_Renderer* gRenderer = NULL;
 
+SDL_Joystick* gJoyStick = NULL;
+SDL_Haptic* gHaptic = NULL;
+
 int gWinWidth = 640;
 int gWinHeight = 480;
 
@@ -49,6 +52,8 @@ int update_state();
 int redraw();
 
 int setupSDL2();
+int setupSDL2HapticJoystick();
+int setupSDL2Haptic();
 int shutdownSDL2();
 
 //============================================================================
@@ -58,6 +63,8 @@ int main(int argc, char **argv)
 
    if (PLAYGROUND_OK == setupSDL2())
    {
+      setupSDL2HapticJoystick();
+
       do_work();
 
       shutdownSDL2();
@@ -80,6 +87,80 @@ int do_work()
       handle_events();
       update_state();
       redraw();
+   }
+
+   return return_value;
+}
+//============================================================================
+int setupSDL2Haptic()
+{
+   int return_value = -1;
+   if (PLAYGROUND_OK == SDL_InitSubSystem(SDL_INIT_HAPTIC))
+   {
+      gHaptic = SDL_HapticOpenFromJoystick(gJoyStick);
+      if(NULL == gHaptic)
+      {
+         printf("SDL_HapticOpenFromJoystick(gJoyStick) failed: %s\n", SDL_GetError());
+         gHaptic = SDL_HapticOpen(0);
+         if(NULL == gHaptic)
+         {
+            printf("SDL_HapticOpen(0) failed: %s\n", SDL_GetError());
+         }
+      }
+      if(NULL != gHaptic)
+      {
+         return_value = PLAYGROUND_OK;
+         if(SDL_TRUE == SDL_HapticRumbleSupported(gHaptic))
+         {
+            if(PLAYGROUND_OK == SDL_HapticRumbleInit(gHaptic))
+            {
+               SDL_HapticRumblePlay(gHaptic,0.5,1000);
+            }
+            else
+            {
+               printf("SDL_HapticRumbleInit(gHaptic) failed: %s\n", SDL_GetError());
+            }
+         }
+         else
+         {
+            printf("SDL_HapticRumbleSupported(gHaptic) failed: %s\n", SDL_GetError());
+         }
+      }
+   }
+   else
+   {
+      printf("SDL_InitSubSystem(SDL_INIT_HAPTIC) failed: %s\n", SDL_GetError());
+   }
+
+   return return_value;
+}
+//============================================================================
+int setupSDL2HapticJoystick()
+{
+   int return_value = -1;
+
+   int joycount = 0;
+   //SDL_SetHint("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1");
+   if (PLAYGROUND_OK == SDL_InitSubSystem(SDL_INIT_JOYSTICK))
+   {
+      joycount = SDL_NumJoysticks();
+      printf("SDL_NumJoysticks() shows: %d joysticks\n", joycount);
+      if(joycount > 0)
+      {
+         gJoyStick = SDL_JoystickOpen(0);
+         if(NULL != gJoyStick)
+         {
+            return_value = setupSDL2Haptic(); //PLAYGROUND_OK;
+         }
+         else
+         {
+            printf("SDL_JoystickOpen() failed: %s\n", SDL_GetError());
+         }
+      }
+   }
+   else
+   {
+      printf("SDL_InitSubSystem(SDL_INIT_JOYSTICK) failed: %s\n", SDL_GetError());
    }
 
    return return_value;
@@ -123,6 +204,12 @@ int setupSDL2()
 int shutdownSDL2()
 {
    int return_value = 0;
+
+   SDL_HapticClose(gHaptic);
+   SDL_QuitSubSystem(SDL_INIT_HAPTIC);
+
+   SDL_JoystickClose(gJoyStick);
+   SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 
    // Shutdown the renderer
    if(NULL != gRenderer)
