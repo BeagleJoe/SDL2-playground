@@ -53,7 +53,10 @@ int do_work();
 int update_state();
 int redraw();
 
-void DumpSDLversions();
+void dumpSDLversions();
+int dumpSDL2Joystick();
+int dumpSDL2Haptic();
+
 int setupSDL2();
 int setupSDL2Joystick();
 int setupSDL2Haptic();
@@ -64,7 +67,10 @@ int main(int argc, char **argv)
 {
    int return_value = 0;
 
-   DumpSDLversions();
+   dumpSDLversions();
+   dumpSDL2Joystick();
+   dumpSDL2Haptic();
+
 
    if (PLAYGROUND_OK == setupSDL2())
    {
@@ -285,7 +291,7 @@ int shutdownSDL2()
    return return_value;
 }
 //============================================================================
-void DumpSDLversions()
+void dumpSDLversions()
 {
    SDL_version compiled;
    SDL_version linked;
@@ -297,7 +303,40 @@ void DumpSDLversions()
    printf("Linking against SDL version %d.%d.%d.\n",
       linked.major, linked.minor, linked.patch);
 }
-
+//============================================================================
+int dumpSDL2Joystick()
+{
+   int return_value = -1;
+   if (PLAYGROUND_OK == SDL_InitSubSystem(SDL_INIT_JOYSTICK))
+   {
+      int joycount = SDL_NumJoysticks();
+      printf("SDL_NumJoysticks() shows: %d joysticks\n", joycount);
+      for(int joy = 0; joy < joycount;joy++)
+      {
+         printf("%2.2d SDL_JoystickNameForIndex() shows: %s \n",joy,SDL_JoystickNameForIndex(joy));
+      }
+      SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+      return_value = joycount;
+   }
+   return return_value;
+}
+//============================================================================
+int dumpSDL2Haptic()
+{
+   int return_value = -1;
+   if (PLAYGROUND_OK == SDL_InitSubSystem(SDL_INIT_HAPTIC))
+   {
+      int hapticcount = SDL_NumHaptics();
+      printf("SDL_NumHaptics() shows: %d haptic devices\n", hapticcount);
+      for(int hap = 0; hap < hapticcount;hap++)
+      {
+         printf("%2.2d SDL_HapticName() shows: %s \n",hap,SDL_HapticName(hap));
+      }
+      SDL_QuitSubSystem(SDL_INIT_HAPTIC);
+      return_value = hapticcount;
+   }
+   return return_value;
+}
 //============================================================================
 int redraw()
 {
@@ -311,7 +350,6 @@ int redraw()
 
    return return_value;
 }
-
 //============================================================================
 int update_state()
 {
