@@ -115,10 +115,10 @@ int setupSDL2Haptic()
       hapticcount = SDL_NumHaptics();
       printf("SDL_NumHaptics() shows: %d haptic devices\n", hapticcount);
 
-      gHaptic = SDL_HapticOpenFromJoystick(gJoyStick);
+      //gHaptic = SDL_HapticOpenFromJoystick(gJoyStick);
       if(NULL == gHaptic)
       {
-         printf("SDL_HapticOpenFromJoystick(gJoyStick) failed: %s\n", SDL_GetError());
+         //printf("SDL_HapticOpenFromJoystick(gJoyStick) failed: %s\n", SDL_GetError());
          gHaptic = SDL_HapticOpen(0);
          if(NULL == gHaptic)
          {
