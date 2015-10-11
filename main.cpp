@@ -36,6 +36,7 @@
 // Global variables
 SDL_Window* gWin = NULL;
 SDL_Renderer* gRenderer = NULL;
+SDL_GLContext gContext = NULL;
 
 SDL_Joystick* gJoyStick = NULL;
 SDL_Haptic* gHaptic = NULL;
@@ -44,6 +45,9 @@ SDL_HapticEffect gEffect[1];
 
 int gWinWidth = 640;
 int gWinHeight = 480;
+
+int defMajorOGL = 0;
+int defMinorOGL = 0;
 
 bool gGameOver = false;
 
@@ -58,6 +62,7 @@ int createHapticEffect();
 void dumpSDLversions();
 int dumpSDL2Joystick();
 int dumpSDL2Haptic();
+void dumpOpenGLversions();
 
 int setupSDL2();
 int setupSDL2Joystick();
@@ -104,6 +109,52 @@ int do_work()
    }
 
    return return_value;
+}
+//============================================================================
+void dumpOpenGLversions()
+{
+    if(NULL != gWin)
+    {
+        SDL_GLContext context = NULL;
+        int Major = 5;
+        int Minor = 5;
+
+        context = SDL_GL_CreateContext(gWin);
+        if(context)
+        {
+            SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &defMajorOGL);
+            SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &defMinorOGL);
+            printf("Default OpenGL version: %d.%d\n", defMajorOGL,defMinorOGL);
+            SDL_GL_DeleteContext(context);
+            context = NULL;
+        }
+
+        while(Major >= 1)
+        {
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, Major);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, Minor);
+            context = SDL_GL_CreateContext(gWin);
+
+            if(context)
+            {
+                SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &Major);
+                SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &Minor);
+                printf("OpenGL version: %d.%d available\n", Major,Minor);
+                SDL_GL_DeleteContext(context);
+                context = NULL;
+            }
+            Minor--;
+            if(Minor < 0)
+            {
+                Minor = 5;
+                Major--;
+            }
+        }
+    }
+    else
+    {
+        printf("SDL_GL_CreateContext() needs an : SDL_Window\n");
+    }
 }
 //============================================================================
 int setupSDL2Haptic()
@@ -233,14 +284,24 @@ int setupSDL2()
 
    if (SDL_InitSubSystem(SDL_INIT_VIDEO) >= 0)
    {
-      gWin = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_RESIZABLE);//SDL_WINDOW_SHOWN
+      gWin = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_OPENGL);//SDL_WINDOW_SHOWN
       if(NULL != gWin)
       {
+         dumpOpenGLversions();
          gRenderer = SDL_CreateRenderer(gWin,-1,0);
          if(NULL != gRenderer)
          {
-            // TODO - add more setup here
-            return_value = 0;
+             int Major = -1;
+             int Minor = -1;
+             // TODO - add more setup here
+             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, defMajorOGL);
+             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, defMinorOGL);
+             gContext = SDL_GL_CreateContext(gWin);
+             SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &Major);
+             SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &Minor);
+             printf("OpenGL version: %d.%d\n", Major,Minor);
+
+             return_value = 0;
          }
          else
          {
@@ -277,6 +338,11 @@ int shutdownSDL2()
    {
       SDL_DestroyRenderer(gRenderer);
       gRenderer = NULL;
+   }
+   if(NULL != gContext)
+   {
+       SDL_GL_DeleteContext(gContext);
+       gContext = NULL;
    }
 
    // Shutdown the window
