@@ -118,7 +118,7 @@ int setupSDL2Haptic()
       //gHaptic = SDL_HapticOpenFromJoystick(gJoyStick);
       if(NULL == gHaptic)
       {
-         //printf("SDL_HapticOpenFromJoystick(gJoyStick) failed: %s\n", SDL_GetError());
+         printf("SDL_HapticOpenFromJoystick(gJoyStick) failed: %s\n", SDL_GetError());
          gHaptic = SDL_HapticOpen(0);
          if(NULL == gHaptic)
          {
@@ -354,10 +354,10 @@ int createHapticEffect()
             gEffect[0].constant.direction.dir[0] = 1;
             gEffect[0].constant.direction.dir[1] = 0;
             gEffect[0].constant.direction.dir[2] = 0;
-            gEffect[0].constant.length = 7000;
-            gEffect[0].constant.level = -0x4000;
-            gEffect[0].constant.attack_length = 100;
-            gEffect[0].constant.fade_length = 100;
+            gEffect[0].constant.length = 2500;
+            gEffect[0].constant.level = -0x7fff;
+            gEffect[0].constant.attack_length = 00;
+            gEffect[0].constant.fade_length = 00;
 
             int effect = SDL_HapticNewEffect(gHaptic,gEffect);
             if(effect >=0)
