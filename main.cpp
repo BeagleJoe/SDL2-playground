@@ -49,6 +49,9 @@ int gWinHeight = 480;
 int defMajorOGL = 0;
 int defMinorOGL = 0;
 
+int msBuffers = 0;
+int msSamples = 0;
+
 bool gGameOver = false;
 
 // Forward declare functions
@@ -111,15 +114,82 @@ int do_work()
    return return_value;
 }
 //============================================================================
+void dumpOpenGLmultisample()
+{
+    int repBuffers = 1;
+    int repSamples = 32;
+    msBuffers = 1;
+    msSamples = 32;
+    SDL_Window* window = NULL;
+    SDL_GLContext context = NULL;
+    int Major = 0;
+    int Minor = 0;
+
+    while(msSamples > 1)
+    {
+        int err = SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, msBuffers);
+        err = SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, msSamples);
+
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
+        //err = SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
+        window = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_OPENGL);
+        if(NULL != window)
+        {
+            gRenderer = SDL_CreateRenderer(window,-1,0);
+            if(NULL != gRenderer)
+            {
+                context = SDL_GL_CreateContext(window);
+                if(context)
+                {
+                    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &Major);
+                    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &Minor);
+                    printf("Using OpenGL version: %d.%d \n", Major,Minor);
+            
+                    SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &repBuffers);
+                    SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &repSamples);
+                    printf("OpenGL reports multisample buffers: %d     multisample samples: %d\n", repBuffers, repSamples);
+
+                    SDL_GL_DeleteContext(context);
+                    context = NULL;
+                }
+                else
+                {
+                    printf("SDL_GL_CreateContext() FAILED \n");
+                }
+                SDL_DestroyRenderer(gRenderer);
+                gRenderer = NULL;
+            }
+            else
+            {
+                printf("SDL_CreateRenderer() FAILED \n");
+            }
+
+            SDL_DestroyWindow(window);
+            window = NULL;
+        }
+        else
+        {
+            printf("SDL_CreateWindow() FAILED \n");
+        }
+        msSamples /= 2;
+    }
+}
+//============================================================================
 void dumpOpenGLversions()
 {
-    if(NULL != gWin)
-    {
-        SDL_GLContext context = NULL;
-        int Major = 5;
-        int Minor = 5;
 
-        context = SDL_GL_CreateContext(gWin);
+    SDL_GLContext context = NULL;
+    int Major = 5;
+    int Minor = 5;
+    SDL_Window* window = NULL;
+    window = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_OPENGL);
+
+    if(NULL != window)
+    {
+        context = SDL_GL_CreateContext(window);
         if(context)
         {
             SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &defMajorOGL);
@@ -129,11 +199,19 @@ void dumpOpenGLversions()
             context = NULL;
         }
 
-        while(Major >= 1)
+        SDL_DestroyWindow(window);
+        window = NULL;
+    }
+
+    while(Major >= 1)
+    {
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, Major);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, Minor);
+
+        window = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
+        if(NULL != window)
         {
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, Major);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, Minor);
-            context = SDL_GL_CreateContext(gWin);
+            context = SDL_GL_CreateContext(window);
 
             if(context)
             {
@@ -143,17 +221,15 @@ void dumpOpenGLversions()
                 SDL_GL_DeleteContext(context);
                 context = NULL;
             }
-            Minor--;
-            if(Minor < 0)
-            {
-                Minor = 5;
-                Major--;
-            }
+            SDL_DestroyWindow(window);
+            window = NULL;
         }
-    }
-    else
-    {
-        printf("SDL_GL_CreateContext() needs an : SDL_Window\n");
+        Minor--;
+        if(Minor < 0)
+        {
+            Minor = 5;
+            Major--;
+        }
     }
 }
 //============================================================================
@@ -284,15 +360,27 @@ int setupSDL2()
 
    if (SDL_InitSubSystem(SDL_INIT_VIDEO) >= 0)
    {
+       bool bValue = false;
+      dumpOpenGLversions();
+      dumpOpenGLmultisample();
+      SDL_GL_ResetAttributes();
       gWin = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_OPENGL);//SDL_WINDOW_SHOWN
       if(NULL != gWin)
       {
-         dumpOpenGLversions();
+          bValue = SDL_GL_ExtensionSupported("GL_ARB_multitexture");
+         //dumpOpenGLversions();
          gRenderer = SDL_CreateRenderer(gWin,-1,0);
          if(NULL != gRenderer)
          {
+             //bValue = SDL_GL_ExtensionSupported("GL_ARB_multitexture");
+
              int Major = -1;
              int Minor = -1;
+             int Red = -1;
+             int Green = -1;
+             int Blue = -1;
+             int Depth = -1;
+             int Alpha = -1;
              // TODO - add more setup here
              SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, defMajorOGL);
              SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, defMinorOGL);
@@ -300,6 +388,23 @@ int setupSDL2()
              SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &Major);
              SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &Minor);
              printf("OpenGL version: %d.%d\n", Major,Minor);
+
+             bValue = SDL_GL_ExtensionSupported("GL_ARB_multitexture");
+             bValue = SDL_GL_ExtensionSupported("GL_ARB_multisample");
+             bValue = SDL_GL_ExtensionSupported("GL_ARB_texture_compression");
+             bValue = SDL_GL_ExtensionSupported("GL_ARB_texture_rectangle");
+             bValue = SDL_GL_ExtensionSupported("GL_ARB_texture_non_power_of_two");
+             bValue = SDL_GL_ExtensionSupported("GL_ARB_texture_cube_map");
+             bValue = SDL_GL_ExtensionSupported("GL_ARB_texture_env_combine");
+             bValue = SDL_GL_ExtensionSupported("GL_ARB_texture_env_dot3");
+             bValue = SDL_GL_ExtensionSupported("ARB_imaging");
+             bValue = SDL_GL_ExtensionSupported("GL_EXT_texture_filter_anisotropic");
+
+             SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &Red);
+             SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &Green);
+             SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &Blue);
+             SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &Depth);
+             SDL_GL_GetAttribute(SDL_GL_ALPHA_SIZE, &Alpha);
 
              return_value = 0;
          }
