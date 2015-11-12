@@ -130,10 +130,12 @@ void dumpOpenGLmultisample()
         int err = SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, msBuffers);
         err = SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, msSamples);
 
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+        printf("Trying  multisample buffers = %d     multisample samples = %d\n", msBuffers, msSamples);
 
-        //err = SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, defMajorOGL);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, defMinorOGL);
+
+        err = SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
         window = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_OPENGL);
         if(NULL != window)
@@ -360,14 +362,14 @@ int setupSDL2()
 
    if (SDL_InitSubSystem(SDL_INIT_VIDEO) >= 0)
    {
-       bool bValue = false;
+      bool bValue = false;
       dumpOpenGLversions();
       dumpOpenGLmultisample();
       SDL_GL_ResetAttributes();
       gWin = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_OPENGL);//SDL_WINDOW_SHOWN
       if(NULL != gWin)
       {
-          bValue = SDL_GL_ExtensionSupported("GL_ARB_multitexture");
+         bValue = SDL_GL_ExtensionSupported("GL_ARB_multitexture");
          //dumpOpenGLversions();
          gRenderer = SDL_CreateRenderer(gWin,-1,0);
          if(NULL != gRenderer)
