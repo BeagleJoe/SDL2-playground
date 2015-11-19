@@ -137,7 +137,7 @@ void dumpOpenGLmultisample()
 
         //err = SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
-        window = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_OPENGL);
+        window = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
         if(NULL != window)
         {
             gRenderer = SDL_CreateRenderer(window,-1,0);
@@ -187,7 +187,7 @@ void dumpOpenGLversions()
     int Major = 5;
     int Minor = 5;
     SDL_Window* window = NULL;
-    window = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
 
     if(NULL != window)
     {
