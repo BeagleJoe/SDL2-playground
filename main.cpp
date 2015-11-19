@@ -135,7 +135,7 @@ void dumpOpenGLmultisample()
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, defMajorOGL);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, defMinorOGL);
 
-        err = SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+        //err = SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
         window = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_OPENGL);
         if(NULL != window)
@@ -152,7 +152,7 @@ void dumpOpenGLmultisample()
             
                     SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &repBuffers);
                     SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &repSamples);
-                    printf("OpenGL reports multisample buffers: %d     multisample samples: %d\n", repBuffers, repSamples);
+                    printf("OpenGL reports multisample buffers: %d     multisample samples: %d\n\n", repBuffers, repSamples);
 
                     SDL_GL_DeleteContext(context);
                     context = NULL;
