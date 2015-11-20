@@ -66,6 +66,7 @@ void dumpSDLversions();
 int dumpSDL2Joystick();
 int dumpSDL2Haptic();
 void dumpOpenGLversions();
+void dumpVideoDrivers();
 
 int setupSDL2();
 int setupSDL2Joystick();
@@ -235,6 +236,18 @@ void dumpOpenGLversions()
     }
 }
 //============================================================================
+void dumpVideoDrivers()
+{
+    int nDrivers = SDL_GetNumVideoDrivers();
+
+    for(int i = 0;i < nDrivers;i++)
+    {
+        printf("Video Driver %d: name: %s\n",i, SDL_GetVideoDriver(i));
+    }
+     printf("\n");
+
+}
+//============================================================================
 int setupSDL2Haptic()
 {
    int return_value = -1;
@@ -363,6 +376,7 @@ int setupSDL2()
    if (SDL_InitSubSystem(SDL_INIT_VIDEO) >= 0)
    {
       bool bValue = false;
+      dumpVideoDrivers();
       dumpOpenGLversions();
       dumpOpenGLmultisample();
       SDL_GL_ResetAttributes();
