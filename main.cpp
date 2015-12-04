@@ -38,8 +38,8 @@ SDL_Window* gWin = NULL;
 SDL_Renderer* gRenderer = NULL;
 SDL_GLContext gContext = NULL;
 
-SDL_Joystick* gJoyStick = NULL;
-SDL_Haptic* gHaptic = NULL;
+SDL_Joystick* gJoyStick[16] = {NULL};
+SDL_Haptic* gHaptic[16] = {NULL};
 
 SDL_HapticEffect gEffect[1];
 
@@ -51,6 +51,8 @@ int defMinorOGL = 0;
 
 int msBuffers = 0;
 int msSamples = 0;
+
+int joycount = 0;
 
 bool gGameOver = false;
 
@@ -81,7 +83,6 @@ int main(int argc, char **argv)
    dumpSDLversions();
    dumpSDL2Joystick();
    dumpSDL2Haptic();
-
 
    if (PLAYGROUND_OK == setupSDL2())
    {
@@ -254,80 +255,84 @@ int setupSDL2Haptic()
    int hapticcount = 0;
    if (PLAYGROUND_OK == SDL_InitSubSystem(SDL_INIT_HAPTIC))
    {
-      hapticcount = SDL_NumHaptics();
-      printf("SDL_NumHaptics() shows: %d haptic devices\n", hapticcount);
+       hapticcount = SDL_NumHaptics();
+       printf("SDL_NumHaptics() shows: %d haptic devices\n", hapticcount);
+       for(int i = 0;i < joycount;i++)
+       {
+           gHaptic[i] = SDL_HapticOpenFromJoystick(gJoyStick[i]);
+       
+           if(NULL == gHaptic[i])
+           {
+               printf("SDL_HapticOpenFromJoystick(gJoyStick[i]) failed: %s\n", SDL_GetError());
+               gHaptic[i] = SDL_HapticOpen(i);
+               if(NULL == gHaptic[i])
+               {
+                   printf("SDL_HapticOpen(%d) failed: %s\n",i, SDL_GetError());
+               }
+               else
+               {
+                   printf("SDL_HapticOpen(%d) Opened: %s\n",i, SDL_HapticName(i));
+               }
+           }
+           else
+           {
+               printf("SDL_HapticOpenFromJoystick(gJoyStick[i]) Opened: %s\n", SDL_HapticName(i));
+           }
+       }
+       //    if(NULL != gHaptic[i])
+       //    {
+       //        return_value = PLAYGROUND_OK;
+       //        if(SDL_TRUE == SDL_HapticRumbleSupported(gHaptic[i]))
+       //        {
+       //            if(PLAYGROUND_OK == SDL_HapticRumbleInit(gHaptic[i]))
+       //            {
+       //                SDL_HapticRumbleStop(gHaptic[i]);
+       //                SDL_HapticRumblePlay(gHaptic[i],0.5f,1000);
+       //                SDL_Delay(1000);
+       //            }
+       //            else
+       //            {
+       //                printf("SDL_HapticRumbleInit(gHaptic[i]) failed: %s\n", SDL_GetError());
+       //            }
+       //        }
+       //        else
+       //        {
+       //            printf("SDL_HapticRumbleSupported(gHaptic[i]) returned FALSE \n");
+       //        }
+       //        createHapticEffect();
+       //        //if ((SDL_HapticQuery(gHaptic[i]) & SDL_HAPTIC_CONSTANT) != 0)
+       //        //{
+       //        //   gEffect.type = SDL_HAPTIC_CONSTANT;
+       //        //   gEffect.constant.direction.type = SDL_HAPTIC_POLAR;
+       //        //   gEffect.constant.direction.dir[0] = 9000;
+       //        //   gEffect.constant.length = 1000;
+       //        //   gEffect.constant.level = 25000;
+       //        //   gEffect.constant.attack_length = 0;
+       //        //   gEffect.constant.fade_length = 1000;
 
-      //gHaptic = SDL_HapticOpenFromJoystick(gJoyStick);
-      if(NULL == gHaptic)
-      {
-         printf("SDL_HapticOpenFromJoystick(gJoyStick) failed: %s\n", SDL_GetError());
-         gHaptic = SDL_HapticOpen(0);
-         if(NULL == gHaptic)
-         {
-            printf("SDL_HapticOpen(0) failed: %s\n", SDL_GetError());
-         }
-         else
-         {
-            printf("SDL_HapticOpen(0) Opened: %s\n", SDL_HapticName(0));
-         }
-      }
-      else
-      {
-         printf("SDL_HapticOpenFromJoystick(gJoyStick) Opened: %s\n", SDL_HapticName(0));
-      }
-      if(NULL != gHaptic)
-      {
-         return_value = PLAYGROUND_OK;
-         if(SDL_TRUE == SDL_HapticRumbleSupported(gHaptic))
-         {
-            if(PLAYGROUND_OK == SDL_HapticRumbleInit(gHaptic))
-            {
-               SDL_HapticRumbleStop(gHaptic);
-               SDL_HapticRumblePlay(gHaptic,0.5f,1000);
-               SDL_Delay(1000);
-            }
-            else
-            {
-               printf("SDL_HapticRumbleInit(gHaptic) failed: %s\n", SDL_GetError());
-            }
-         }
-         else
-         {
-            printf("SDL_HapticRumbleSupported(gHaptic) returned FALSE \n");
-         }
-         createHapticEffect();
-         //if ((SDL_HapticQuery(gHaptic) & SDL_HAPTIC_CONSTANT) != 0)
-         //{
-         //   gEffect.type = SDL_HAPTIC_CONSTANT;
-         //   gEffect.constant.direction.type = SDL_HAPTIC_POLAR;
-         //   gEffect.constant.direction.dir[0] = 9000;
-         //   gEffect.constant.length = 1000;
-         //   gEffect.constant.level = 25000;
-         //   gEffect.constant.attack_length = 0;
-         //   gEffect.constant.fade_length = 1000;
-
-         //   int effect = SDL_HapticNewEffect(gHaptic,&gEffect);
-         //   if(effect >=0)
-         //   {
-         //      if(PLAYGROUND_OK == SDL_HapticRunEffect(gHaptic,effect,1))
-         //      {
-         //         SDL_Delay(2000);
-         //      }
-         //      else
-         //      {
-         //         printf("SDL_HapticRunEffect(gHaptic) failed: %s\n", SDL_GetError());
-         //      }
-         //   }
-         //   else
-         //   {
-         //      printf("SDL_HapticNewEffect(gHaptic) failed: %s\n", SDL_GetError());
-         //   }
-         //}
-         //else
-         //{
-         //   printf("SDL_HapticQuery(gHaptic) for SDL_HAPTIC_CONSTANT returned FALSE \n");
-         //}
-      }
+       //        //   int effect = SDL_HapticNewEffect(gHaptic[i],&gEffect);
+       //        //   if(effect >=0)
+       //        //   {
+       //        //      if(PLAYGROUND_OK == SDL_HapticRunEffect(gHaptic[i],effect,1))
+       //        //      {
+       //        //         SDL_Delay(2000);
+       //        //      }
+       //        //      else
+       //        //      {
+       //        //         printf("SDL_HapticRunEffect(gHaptic[i]) failed: %s\n", SDL_GetError());
+       //        //      }
+       //        //   }
+       //        //   else
+       //        //   {
+       //        //      printf("SDL_HapticNewEffect(gHaptic[i]) failed: %s\n", SDL_GetError());
+       //        //   }
+       //        //}
+       //        //else
+       //        //{
+       //        //   printf("SDL_HapticQuery(gHaptic[i]) for SDL_HAPTIC_CONSTANT returned FALSE \n");
+       //        //}
+       //    }
+       //}
    }
    else
    {
@@ -341,19 +346,39 @@ int setupSDL2Joystick()
 {
    int return_value = -1;
 
-   int joycount = 0;
    //SDL_SetHint("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1");
-   if (PLAYGROUND_OK == SDL_InitSubSystem(SDL_INIT_JOYSTICK))
+   if (PLAYGROUND_OK == SDL_InitSubSystem(SDL_INIT_JOYSTICK|SDL_INIT_HAPTIC|SDL_INIT_GAMECONTROLLER))
    {
       joycount = SDL_NumJoysticks();
       printf("SDL_NumJoysticks() shows: %d joysticks\n", joycount);
-      if(joycount > 0)
+      for(int i = 0;i < joycount;i++)
       {
-         gJoyStick = SDL_JoystickOpen(0);
-         if(NULL != gJoyStick)
+         gJoyStick[i] = SDL_JoystickOpen(i);
+         if(NULL != gJoyStick[i])
          {
-            printf("SDL_JoystickOpen() Opened: %s\n", SDL_JoystickName(gJoyStick));
+            printf("SDL_JoystickOpen() Opened: %s\n", SDL_JoystickName(gJoyStick[i]));
             return_value = PLAYGROUND_OK;
+            int ret = SDL_JoystickIsHaptic(gJoyStick[i]);
+            if(ret == 1)
+            {
+                printf("SDL_JoystickIsHaptic() returned true\n");
+            }
+            if(ret == 0)
+            {
+                printf("SDL_JoystickIsHaptic() returned true\n");
+            }
+            if(ret < 0)
+            {
+                printf("SDL_JoystickIsHaptic() failed: %s\n", SDL_GetError());
+            }
+            if(SDL_IsGameController(i))
+            {
+                printf("SDL_IsGameController() returned true\n");
+            }
+            else
+            {
+                printf("SDL_IsGameController() returned true\n");
+            }
          }
          else
          {
@@ -380,6 +405,9 @@ int setupSDL2()
       dumpOpenGLversions();
       dumpOpenGLmultisample();
       SDL_GL_ResetAttributes();
+      //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, defMajorOGL);
+      //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, defMinorOGL);
+
       gWin = SDL_CreateWindow("SDL2 Window",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,gWinWidth,gWinHeight,SDL_WINDOW_OPENGL);//SDL_WINDOW_SHOWN
       if(NULL != gWin)
       {
@@ -398,8 +426,8 @@ int setupSDL2()
              int Depth = -1;
              int Alpha = -1;
              // TODO - add more setup here
-             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, defMajorOGL);
-             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, defMinorOGL);
+             //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, defMajorOGL);
+             //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, defMinorOGL);
              gContext = SDL_GL_CreateContext(gWin);
              SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &Major);
              SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &Minor);
@@ -448,10 +476,16 @@ int shutdownSDL2()
 {
    int return_value = 0;
 
-   SDL_HapticClose(gHaptic);
+   for(int i = 0;i < 16;i++)
+   {
+       SDL_HapticClose(gHaptic[i]);
+   }
    SDL_QuitSubSystem(SDL_INIT_HAPTIC);
 
-   SDL_JoystickClose(gJoyStick);
+   for(int i = 0;i < 16;i++)
+   {
+       SDL_JoystickClose(gJoyStick[i]);
+   }
    SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 
    // Shutdown the renderer
@@ -522,7 +556,9 @@ int dumpSDL2Haptic()
       {
          printf("%2.2d SDL_HapticName() shows: %s \n",hap,SDL_HapticName(hap));
       }
-      SDL_QuitSubSystem(SDL_INIT_HAPTIC);
+      // Due to bug in 2.0.3, cannot Quit SDL_INIT_HAPTIC, then later re-init.
+      // This is fixed in the upcoming 2.0.4
+      //SDL_QuitSubSystem(SDL_INIT_HAPTIC);
       return_value = hapticcount;
    }
    return return_value;
@@ -531,43 +567,43 @@ int dumpSDL2Haptic()
 int createHapticEffect()
 {
    int return_value = -1;
-   if(NULL != gHaptic)
-   {
-      if ((SDL_HapticQuery(gHaptic) & SDL_HAPTIC_CONSTANT) != 0)
-         {
-            //gEffect[0] = SDL_HapticEffect();
-            gEffect[0].type = SDL_HAPTIC_CONSTANT;
-            gEffect[0].constant.direction.type = SDL_HAPTIC_CARTESIAN;
-            gEffect[0].constant.direction.dir[0] = 1;
-            gEffect[0].constant.direction.dir[1] = 0;
-            gEffect[0].constant.direction.dir[2] = 0;
-            gEffect[0].constant.length = 2500;
-            gEffect[0].constant.level = -0x7fff;
-            gEffect[0].constant.attack_length = 00;
-            gEffect[0].constant.fade_length = 00;
+   //if(NULL != gHaptic)
+   //{
+   //   if ((SDL_HapticQuery(gHaptic) & SDL_HAPTIC_CONSTANT) != 0)
+   //      {
+   //         //gEffect[0] = SDL_HapticEffect();
+   //         gEffect[0].type = SDL_HAPTIC_CONSTANT;
+   //         gEffect[0].constant.direction.type = SDL_HAPTIC_CARTESIAN;
+   //         gEffect[0].constant.direction.dir[0] = 1;
+   //         gEffect[0].constant.direction.dir[1] = 0;
+   //         gEffect[0].constant.direction.dir[2] = 0;
+   //         gEffect[0].constant.length = 2500;
+   //         gEffect[0].constant.level = -0x7fff;
+   //         gEffect[0].constant.attack_length = 00;
+   //         gEffect[0].constant.fade_length = 00;
 
-            int effect = SDL_HapticNewEffect(gHaptic,gEffect);
-            if(effect >=0)
-            {
-               if(PLAYGROUND_OK == SDL_HapticRunEffect(gHaptic,effect,1))
-               {
-                  SDL_Delay(2000);
-               }
-               else
-               {
-                  printf("SDL_HapticRunEffect(gHaptic) failed: %s\n", SDL_GetError());
-               }
-            }
-            else
-            {
-               printf("SDL_HapticNewEffect(gHaptic) failed: %s\n", SDL_GetError());
-            }
-         }
-         else
-         {
-            printf("SDL_HapticQuery(gHaptic) for SDL_HAPTIC_CONSTANT returned FALSE \n");
-         }
-   }
+   //         int effect = SDL_HapticNewEffect(gHaptic,gEffect);
+   //         if(effect >=0)
+   //         {
+   //            if(PLAYGROUND_OK == SDL_HapticRunEffect(gHaptic,effect,1))
+   //            {
+   //               SDL_Delay(2000);
+   //            }
+   //            else
+   //            {
+   //               printf("SDL_HapticRunEffect(gHaptic) failed: %s\n", SDL_GetError());
+   //            }
+   //         }
+   //         else
+   //         {
+   //            printf("SDL_HapticNewEffect(gHaptic) failed: %s\n", SDL_GetError());
+   //         }
+   //      }
+   //      else
+   //      {
+   //         printf("SDL_HapticQuery(gHaptic) for SDL_HAPTIC_CONSTANT returned FALSE \n");
+   //      }
+   //}
    return return_value;
 }
 //============================================================================
