@@ -46,6 +46,8 @@ SDL_HapticEffect gEffect[1];
 int gWinWidth = 640;
 int gWinHeight = 480;
 
+SDL_version linked;
+
 int defMajorOGL = 0;
 int defMinorOGL = 0;
 
@@ -256,14 +258,14 @@ int setupSDL2Haptic()
    if (PLAYGROUND_OK == SDL_InitSubSystem(SDL_INIT_HAPTIC))
    {
        hapticcount = SDL_NumHaptics();
-       printf("SDL_NumHaptics() shows: %d haptic devices\n", hapticcount);
+       printf("\nSDL_NumHaptics() shows: %d haptic devices\n", hapticcount);
        for(int i = 0;i < joycount;i++)
        {
            gHaptic[i] = SDL_HapticOpenFromJoystick(gJoyStick[i]);
        
            if(NULL == gHaptic[i])
            {
-               printf("SDL_HapticOpenFromJoystick(gJoyStick[i]) failed: %s\n", SDL_GetError());
+               printf("\nSDL_HapticOpenFromJoystick(gJoyStick[i]) failed: %s\n", SDL_GetError());
                gHaptic[i] = SDL_HapticOpen(i);
                if(NULL == gHaptic[i])
                {
@@ -276,29 +278,34 @@ int setupSDL2Haptic()
            }
            else
            {
-               printf("SDL_HapticOpenFromJoystick(gJoyStick[i]) Opened: %s\n", SDL_HapticName(i));
+               printf("\nSDL_HapticOpenFromJoystick(gJoyStick[i]) Opened: %s\n", SDL_HapticName(i));
+           }
+       
+           if(NULL != gHaptic[i])
+           {
+               return_value = PLAYGROUND_OK;
+               if(SDL_TRUE == SDL_HapticRumbleSupported(gHaptic[i]))
+               {
+                   printf("SDL_HapticRumbleSupported(gHaptic[i]) returned SDL_TRUE \n");
+                   if(PLAYGROUND_OK == SDL_HapticRumbleInit(gHaptic[i]))
+                   {
+                       printf("SDL_HapticRumbleInit(gHaptic[i]) returned SDL_TRUE \n");
+
+                       //SDL_HapticRumbleStop(gHaptic[i]);
+                       SDL_HapticRumblePlay(gHaptic[i],1.0f,3000);
+                       SDL_Delay(3000);
+                   }
+                   else
+                   {
+                       printf("SDL_HapticRumbleInit(gHaptic[i]) failed: %s\n", SDL_GetError());
+                   }
+               }
+               else
+               {
+                   printf("SDL_HapticRumbleSupported(gHaptic[i]) returned SDL_FALSE \n");
+               }
            }
        }
-       //    if(NULL != gHaptic[i])
-       //    {
-       //        return_value = PLAYGROUND_OK;
-       //        if(SDL_TRUE == SDL_HapticRumbleSupported(gHaptic[i]))
-       //        {
-       //            if(PLAYGROUND_OK == SDL_HapticRumbleInit(gHaptic[i]))
-       //            {
-       //                SDL_HapticRumbleStop(gHaptic[i]);
-       //                SDL_HapticRumblePlay(gHaptic[i],0.5f,1000);
-       //                SDL_Delay(1000);
-       //            }
-       //            else
-       //            {
-       //                printf("SDL_HapticRumbleInit(gHaptic[i]) failed: %s\n", SDL_GetError());
-       //            }
-       //        }
-       //        else
-       //        {
-       //            printf("SDL_HapticRumbleSupported(gHaptic[i]) returned FALSE \n");
-       //        }
        //        createHapticEffect();
        //        //if ((SDL_HapticQuery(gHaptic[i]) & SDL_HAPTIC_CONSTANT) != 0)
        //        //{
@@ -336,7 +343,7 @@ int setupSDL2Haptic()
    }
    else
    {
-      printf("SDL_InitSubSystem(SDL_INIT_HAPTIC) failed: %s\n", SDL_GetError());
+      printf("\nSDL_InitSubSystem(SDL_INIT_HAPTIC) failed: %s\n", SDL_GetError());
    }
 
    return return_value;
@@ -350,22 +357,22 @@ int setupSDL2Joystick()
    if (PLAYGROUND_OK == SDL_InitSubSystem(SDL_INIT_JOYSTICK|SDL_INIT_HAPTIC|SDL_INIT_GAMECONTROLLER))
    {
       joycount = SDL_NumJoysticks();
-      printf("SDL_NumJoysticks() shows: %d joysticks\n", joycount);
+      printf("\nSDL_NumJoysticks() shows: %d joysticks\n", joycount);
       for(int i = 0;i < joycount;i++)
       {
          gJoyStick[i] = SDL_JoystickOpen(i);
          if(NULL != gJoyStick[i])
          {
-            printf("SDL_JoystickOpen() Opened: %s\n", SDL_JoystickName(gJoyStick[i]));
+            printf("\nSDL_JoystickOpen() Opened: %s\n", SDL_JoystickName(gJoyStick[i]));
             return_value = PLAYGROUND_OK;
             int ret = SDL_JoystickIsHaptic(gJoyStick[i]);
-            if(ret == 1)
+            if(ret == SDL_TRUE)
             {
                 printf("SDL_JoystickIsHaptic() returned true\n");
             }
-            if(ret == 0)
+            if(ret == SDL_FALSE)
             {
-                printf("SDL_JoystickIsHaptic() returned true\n");
+                printf("SDL_JoystickIsHaptic() returned false\n");
             }
             if(ret < 0)
             {
@@ -377,12 +384,12 @@ int setupSDL2Joystick()
             }
             else
             {
-                printf("SDL_IsGameController() returned true\n");
+                printf("SDL_IsGameController() returned false\n");
             }
          }
          else
          {
-            printf("SDL_JoystickOpen() failed: %s\n", SDL_GetError());
+            printf("\nSDL_JoystickOpen() failed: %s\n", SDL_GetError());
          }
       }
    }
@@ -402,8 +409,8 @@ int setupSDL2()
    {
       bool bValue = false;
       dumpVideoDrivers();
-      dumpOpenGLversions();
-      dumpOpenGLmultisample();
+      //dumpOpenGLversions();
+      //dumpOpenGLmultisample();
       SDL_GL_ResetAttributes();
       //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, defMajorOGL);
       //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, defMinorOGL);
@@ -518,7 +525,7 @@ int shutdownSDL2()
 void dumpSDLversions()
 {
    SDL_version compiled;
-   SDL_version linked;
+   //SDL_version linked;
 
    SDL_VERSION(&compiled);
    SDL_GetVersion(&linked);
@@ -558,7 +565,11 @@ int dumpSDL2Haptic()
       }
       // Due to bug in 2.0.3, cannot Quit SDL_INIT_HAPTIC, then later re-init.
       // This is fixed in the upcoming 2.0.4
-      //SDL_QuitSubSystem(SDL_INIT_HAPTIC);
+      if((linked.major >= 2) && (linked.patch >= 4))
+      {
+          SDL_QuitSubSystem(SDL_INIT_HAPTIC);
+      }
+
       return_value = hapticcount;
    }
    return return_value;
